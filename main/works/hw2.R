@@ -90,3 +90,57 @@ powera <- 1-pf(Fcrit(alpha,dfa,df2),dfa,df2,nca)
 powerb <- 1-pf(Fcrit(alpha,dfb,df2),dfa,df2,nca)
 result <-cbind(nreps,df2,powera,powerb)
 result
+
+library(daewr) # 2k design, 2 replicates
+# Table 3
+Des <- expand.grid( F = c(-1, 1), # 2^3 design
+                    C = c(-1, 1), # 2 x 2 x 2  = 8 
+                    D = c(-1, 1)) # 8 x 2 replicates = 16
+
+y <- c(10.50, 2.01, 4.16, 1.58, 5.26, 1.58, 4.10, 1.54, 
+       10.65, 1.59, 4.14, 1.57, 5.27, 1.54, 4.05, 1.48); y
+DesY <- data.frame(cbind(Des,y)); DesY 
+m.water <- lm( y ~ F*C*D, data = DesY) # model m.water
+summary(m.water)
+m.water <- aov( y ~ F*C*D, data = DesY) # model m.water
+summary(m.water) # notice estimate = 0.5 effect, except intercept
+# Table 4
+Des.inv <- expand.grid( F = c(-1, 1), # 2^3 design
+                        C = c(-1, 1), # 2 x 2 x 2  = 8 
+                        D = c(-1, 1)) # 8 x 2 replicates = 16
+y.inv <- 1/y; y.inv
+DesY.inv <- data.frame(cbind(Des.inv,y.inv)); DesY.inv 
+m.water.inv <- lm( y.inv ~ F*C*D, data = DesY.inv) # model m.water.inverse
+summary(m.water.inv) # notice estimate = 0.5 effect, except intercept
+
+flame=rep(c("low","high"),4)
+cover=rep(c("no","no","yes","yes"),2)
+dish=c("small","small","small","small","large","large","large","large")
+data = c(10.50, 2.01, 4.16, 1.58, 5.26, 1.58, 4.10, 1.54, 
+         10.65, 1.59, 4.14, 1.57, 5.27, 1.54, 4.05, 1.48)
+dataset=data.frame(cbind(dish,flame,cover,data))
+m<-aov(data=dataset,data~dish*flame*cover)
+summary(m)
+
+
+#' PROBLEM 9
+D <- expand.grid(silane = c(0.1,0.9),
+                 gas = c(40,220),
+                 pressure = c(300,1200),
+                 temp = c(300,460),
+                 power = c(10,60))
+D[] <- lapply(D, factor)
+
+D
+Refract = c(1.92, 3.06, 1.96, 3.33, 1.87, 2.62, 1.97, 2.96, 1.94, 3.53, 2.06, 3.75, 1.96, 3.14, 2.15, 3.43, 1.95, 3.16, 2.01, 3.43, 1.88, 2.14, 1.98, 2.81, 1.97, 3.67, 2.09, 3.73, 1.98, 2.99, 2.19, 3.39)
+refractdata = data.frame(cbind(D,Refract))
+m <- aov(data = refractdata, Refract ~ silane*gas*pressure*temp*power)
+plot(m)
+model = lm(data = refractdata, Refract ~ silane*gas*pressure*temp*power)
+model
+plot(refractdata$Refract)
+
+m <- aov(data = refractdata, Refract ~ gas*pressure*temp*power)
+summary(m)
+plot(m)
+
