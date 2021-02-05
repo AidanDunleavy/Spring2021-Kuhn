@@ -104,7 +104,7 @@ model.tables(m.roc1, type = "means", se = T) # various means, for corrected sums
 css <- (6.575 - 8.45625)^2 + (6.662 - 8.45625)^2 + (4.425 - 8.45625)^2 + (16.163 - 8.45625)^2; css
 library(daewr)
 bmin <- 2
-bmax <- 5
+bmax <- 8
 alpha <- .05
 sigma2 <- 7.29
 css <- 82.40341
@@ -130,7 +130,7 @@ ROC <- c(
 ROCdata2 <- data.frame(cbind(D,ROC)); ROCdata2 # data.frame
 library(daewr)
 m.roc2 <- aov( ROC ~ block + temp * noise, data = ROCdata2)
-summary(m.roc2) # categorial factors, different if numerical factors
+summary(m.roc2) # categorical factors, different if numerical factors
 
 with(ROCdata2, # 
    (interaction.plot(
@@ -244,18 +244,15 @@ levels(lsd$col) <- c("65", "68", "70", "72")
 lsd
 
 # 4.3 pp 135-140
-D <- expand.grid(barley=c("manchuria","svansota","velvet","trebi","peatland"),year=c(1931,1932),place=c(1,2,3,4,5,6))
+D <- expand.grid(barley=c("manchuria","svansota","velvet","trebi","peatland"),year.place=c("1931-1","1932-1","1931-2","1932-2","1931-3","1932-3","1931-4","1932-4","1931-5","1932-5","1931-6","1932-6"))
 
 D[] = lapply(D, factor)
 
 growthlevels=c(81,105.4,119.7,109.7,98.3,80.7,82.3,80.4,87.2,84.2,146.6,142,150.7,191.5,145.7,100.4,115.5,112.2,147.7,108.1,82.3,77.3,78.4,131.3,89.6,103.1,105.1,116.5,139.9,129.6,119.8,121.4,124,140.8,124.8,98.9,61.9,96.2,125.5,75.7,98.9,89,69.1,89.3,104.1,66.4,49.9,96.7,61.9,80.3,86.9,77.1,78.9,101.8,96,67.7,66.7,67.4,91.8,94.1)
 
 GLdata <- data.frame(cbind(D,growthlevels)); GLdata
-m.gl <- aov(growthlevels ~ place + year + barley, data=GLdata) 
-summary(m.gl)
-
-m.gl <- aov(growthlevels ~ place*year + barley, data=GLdata)
-summary(m.gl)
+m.gl <- aov(growthlevels ~ barley + year.place, data=GLdata) 
+summary(m.gl) # RCB design
 
 # 4.6.b pp 135-140
 library(agricolae)

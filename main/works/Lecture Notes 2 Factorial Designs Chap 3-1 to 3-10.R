@@ -533,7 +533,7 @@ interaction.plot(
   popcorn.t1$brand, 
   power, 
   popcorn.t1$y, type = "l",
-  legend=TRUE, 
+  legend=T, 
   ylim = c(.40,.99), 
   main = "Time = short", 
   xlab = "Brand", 
@@ -668,3 +668,4 @@ twok1r.BsProb <- BsProb(
 plot( twok1r.BsProb, main = "Bayes Plot of Effects" )
 par (mfrow = c(1,1) )
 
+help("Tukey1df")
