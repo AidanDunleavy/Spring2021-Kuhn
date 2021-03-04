@@ -271,14 +271,15 @@ msA <- as.matrix( sm[[1]][1,3] ); msA; dfA <- as.matrix( sm[[1]][4,1] ); dfA
 F.AB <- msAB/msE; F.C; probF.AB <- 1 - pf(F.AB, dfAB, dfE) 
 F.B <- msB/msAB; F.B; probF.B <- 1 - pf(F.B, dfB, dfAB) 
 F.A <- msA/msAB; F.A; probF.A <- 1 - pf(F.A, dfA, dfAB) 
-cat("corrected ANOVA F statistics and p-values for NSE design","\n",
-    "F.A =",F.A, " P(>F.A) =", probF.A,"\n",
-    "F.B =",F.B, " P(>F.B) =", probF.B,"\n",
-    "F.AB =",F.AB, " P(>F.AB) =", probF.AB,"\n")
+cat("corrected ANOVA F statistics and p-values for FRSE design","\n",
+    "F.A (lab) =         ",F.A, " P(>F.A) =", probF.A,"\n",
+    "F.B (patient) =     ",F.B, " P(>F.B) =", probF.B,"\n",
+    "F.AB (lab:patient) =",F.AB, " P(>F.AB) =", probF.AB,"\n")
 
 # 5.5.1 method of moments
 m.2bal <- aov( PTSD2 ~ patient + lab + patient:lab, data = PTSD2data)
 sum.m.2bal <- summary(m.2bal) # ANOVA summary for method of moments analysis
+sum.m.2bal
 # using Bennett and Franklin
 r <- 2; a <- 4; b <- 4 # 2 replications per cell; number of a and b
 sigma2 <- msE <- as.matrix( sum.m.2bal[[1]][4,3] ); msE # extract from ANOVA
@@ -286,32 +287,32 @@ msAB <- as.matrix( sum.m.2bal[[1]][3,3] ); msAB
 msB <- as.matrix( sum.m.2bal[[1]][2,3] ); msB 
 msA <- as.matrix( sum.m.2bal[[1]][1,3] ); msA 
 sigma2patientlab <- (msAB - sigma2) / r; sigma2patientlab # method of moments
-sigma2lab <- (msB - sigma2 - r * sigma2patientlab ) / (r*a); sigma2lab
-sigma2patient <- (msA - sigma2 - r * sigma2patientlab ) / (r*b)
+sigma2patient <- (msB - sigma2 - r * sigma2patientlab ) / (r*a); sigma2lab
+sigma2lab <- (msA - sigma2 - r * sigma2patientlab ) / (r*b)
 cat("Method of Moments Variance Component Estimates","\n",
-    "Var(error)=",sigma2,"\n",
-    "Var(patient x lab)=",sigma2patientlab,"\n",
-    "Var(lab)=",sigma2lab,"\n",
-    "Var(patient)=",sigma2patient,"\n")
+    "Var(lab)=          ",sigma2lab,"\n",
+    "Var(patient)=      ",sigma2patient,"\n",
+    "Var(lab x patient)=",sigma2patientlab,"\n",
+    "Var(error)=        ",sigma2,"\n")
 
 # balanced, REML
 library(lme4)
 m.reml.2bal <- lmer(PTSD2 ~ 1 
-                    + (1|patient) + (1|lab) 
-                    + (1|patient:lab), data = PTSD2data)
+                    + (1|lab) + (1|patient)  
+                    + (1|lab:patient), data = PTSD2data)
 summary(m.reml.2bal)
 
 # 5.5.5 balanced, approximate CIs 2-factor sampling experiment
-m.2bal <- aov( PTSD2 ~ patient + lab            # collect msb, msab
+m.2bal <- aov( PTSD2 ~ lab + patient            # collect msb, msab
                + patient:lab, data = PTSD2data) # from ANOVA
 summary(m.2bal)
 library(daewr)
 options(digits = 3)
 # confidence level = 90% for sigma^2_b, and from ANOVA table,
-# c1 = 1/8, ms1 = msb = 2.319, nu1 = 3,
+# c1 = 1/8, ms1 = msb = ms_patient = 5.160, nu1 = 3, 
 # c2 = 1/8, ms2 = msab = 5.530, nu2 = 9
 vci(confl = .90, 
-    c1 = 1/8, ms1 = 2.319, nu1 = 3, 
+    c1 = 1/8, ms1 = 5.160, nu1 = 3, 
     c2 = 1/8, ms2 = 5.530, nu2 = 9)
 library(daewr)
 options(digits = 3)
@@ -423,8 +424,8 @@ msA <- as.matrix( sm[[1]][1,3] ); msA; dfA <- as.matrix( sm[[1]][1,1] ); dfA
 F.B <- msB/msE; F.B; probF.B <- 1 - pf(F.B, dfB, dfE) 
 F.A <- msA/msB; F.A; probF.A <- 1 - pf(F.A, dfA, dfB) 
 cat("corrected ANOVA F statistics and p-values for NSE design","\n",
-    "F.A =",F.A, " P(>F.A) =", probF.A,"\n",
-    "F.B =",F.B, " P(>F.B) =", probF.B,"\n")
+    "F.A (lab)         =",F.A, " P(>F.A) =", probF.A,"\n",
+    "F.B (lab:patient) =",F.B, " P(>F.B) =", probF.B,"\n")
 # 5.6.2 REML in estimates of variance components
 library(lme4)
 m.nest2 <- lmer( MRS.nest ~ 1 + (1|lab)  + (1|lab:patient), data = MRS.nestdata)
@@ -439,8 +440,8 @@ msA <- as.matrix( sm[[1]][1,3] ); msA; dfA <- as.matrix( sm[[1]][1,1] ); dfA
 F.B <- msB/msE; F.B; probF.B <- 1 - pf(F.B, dfB, dfE) 
 F.A <- msA/msB; F.A; probF.A <- 1 - pf(F.A, dfA, dfB) 
 cat("corrected ANOVA F statistics and p-values for NSE design","\n",
-    "F.A =",F.A, " P(>F.A) =", probF.A,"\n",
-    "F.B =",F.B, " P(>F.B) =", probF.B,"\n")
+    "F.A (patient)     =",F.A, " P(>F.A) =", probF.A,"\n",
+    "F.B (patient:lab) =",F.B, " P(>F.B) =", probF.B,"\n")
 # REML in estimates of variance components
 library(lme4)
 m.nest4 <- lmer( MRS.nest ~ 1 + (1|patient)  + (1|patient:lab), data = MRS.nestdata)
@@ -480,9 +481,9 @@ F.C <- msC/msE; F.C; probF.C <- 1 - pf(F.C, dfC, dfE)
 F.B <- msB/msC; F.B; probF.B <- 1 - pf(F.B, dfB, dfC) 
 F.A <- msA/msB; F.A; probF.A <- 1 - pf(F.A, dfA, dfB) 
 cat("corrected ANOVA F statistics and p-values for NSE design","\n",
-    "F.A =",F.A, " P(>F.A) =", probF.A,"\n",
-    "F.B =",F.B, " P(>F.B) =", probF.B,"\n",
-    "F.C =",F.C, " P(>F.C) =", probF.C,"\n")
+    "F.A (lab)              =",F.A, " P(>F.A) =", probF.A,"\n",
+    "F.B (lab:litter)       =",F.B, "  P(>F.B) =", probF.B,"\n",
+    "F.C (lab:litter:mouse) =",F.C, "   P(>F.C) =", probF.C,"\n")
 
 # 5.6.2 method of moments estimation of variance components
 a <- 2; b <- 4; c <- 4; r <- 3
@@ -506,13 +507,76 @@ m.nest4 <- lmer( ROC ~ 1 + (1|lab)
                  + (1|lab:litter:mouse), data = ROCdata)
 summary(m.nest4)
 
+# 5.7.2 four-stage random design
+# patient nested in test nested in preparation nested in lab
+D <- expand.grid( 
+  patient = factor(c(1, 2)), # patient factor 
+  test = factor(c("alpha","beta")), # test factor
+  prep = factor(c("a","b")), # preparation factor
+  lab = factor(c("A","B")) # lab factor
+) # combinations of factors
+D[] <- lapply(D, factor); D # convert to factors
+GABA <- c(
+  1, 2, 3, 4, 1, 2, 3, 4, 3, 8, 2, 3, 1, 2, 5, 2 
+); 
+GABAdata <- data.frame(cbind(D,GABA)); GABAdata # data.frame for NSE
+
+# 5.7.2 ANOVA F statistics and p-values for NSE design
+m.nest4 <- aov( GABA ~ lab 
+                + lab:prep 
+                + lab:prep:test, data = GABAdata)
+sm <- summary(m.nest4); sm
+msE <- as.matrix( sm[[1]][4,3] ); msE; dfE <- as.matrix( sm[[1]][4,1] ); dfE
+msC <- as.matrix( sm[[1]][3,3] ); msC; dfC <- as.matrix( sm[[1]][4,1] ); dfC
+msB <- as.matrix( sm[[1]][2,3] ); msB; dfB <- as.matrix( sm[[1]][4,1] ); dfB
+msA <- as.matrix( sm[[1]][1,3] ); msA; dfA <- as.matrix( sm[[1]][4,1] ); dfA
+F.C <- msC/msE; F.C; probF.C <- 1 - pf(F.C, dfC, dfE) 
+F.B <- msB/msC; F.B; probF.B <- 1 - pf(F.B, dfB, dfC) 
+F.A <- msA/msB; F.A; probF.A <- 1 - pf(F.A, dfA, dfB) 
+cat("corrected ANOVA F statistics and p-values for NSE design","\n",
+    "F.A (lab) =                  ",F.A, " P(>F.A) =", probF.A,"\n",
+    "F.B (lab:prep) =             ",F.B, "     P(>F.B) =", probF.B,"\n",
+    "F.C (lab:prep:test) =        ",F.C, "     P(>F.C) =", probF.C,"\n")
+
 # 5.7 Staggered Nested Designs
 
-# 5.7.1 staggered nested data
-patient <- factor(rep(1:12,4)); patient
-lab <- factor(c(rep("A",36),rep("B",12))); lab
-prep <- factor(c(rep(1,24),rep(2,12),rep(1,12))); prep
-test <- factor(c(rep("alpha",12),rep("beta",12),rep("alpha",24))); test
+# 5.7.1 four-stage random design
+# patient nested in test nested in preparation nested in lab
+D <- expand.grid( 
+  patient = factor(c(1, 2)), # patient factor 
+  test = factor(c("alpha","beta")), # test factor
+  prep = factor(c("a","b")), # preparation factor
+  lab = factor(c("A","B")) # lab factor
+) # combinations of factors
+D[] <- lapply(D, factor); D # convert to factors
+GABA <- c(
+  1, 2, 3, 4, 1, 2, 3, 4, 3, 8, 2, 3, 1, 2, 5, 2 
+); 
+GABAdata <- data.frame(cbind(D,GABA)); GABAdata # NSE data.frame
+GABAdata.SNSE <- GABAdata[-c(4,6:8,12,14:16),]; GABAdata.SNSE # remove runs for staggered NSE
+
+# 5.7.1 ANOVA F statistics and p-values for SNSE design
+m.nest4 <- aov( GABA ~ lab 
+                + lab:prep 
+                + lab:prep:test, data = GABAdata.SNSE)
+sm <- summary(m.nest4); sm
+msE <- as.matrix( sm[[1]][4,3] ); msE; dfE <- as.matrix( sm[[1]][4,1] ); dfE
+msC <- as.matrix( sm[[1]][3,3] ); msC; dfC <- as.matrix( sm[[1]][4,1] ); dfC
+msB <- as.matrix( sm[[1]][2,3] ); msB; dfB <- as.matrix( sm[[1]][4,1] ); dfB
+msA <- as.matrix( sm[[1]][1,3] ); msA; dfA <- as.matrix( sm[[1]][4,1] ); dfA
+F.C <- msC/msE; F.C; probF.C <- 1 - pf(F.C, dfC, dfE) 
+F.B <- msB/msC; F.B; probF.B <- 1 - pf(F.B, dfB, dfC) 
+F.A <- msA/msB; F.A; probF.A <- 1 - pf(F.A, dfA, dfB) 
+cat("corrected ANOVA F statistics and p-values for SNSE design","\n",
+    "F.A (lab) =                  ",F.A, " P(>F.A) =", probF.A,"\n",
+    "F.B (lab:prep) =             ",F.B, "     P(>F.B) =", probF.B,"\n",
+    "F.C (lab:prep:test) =        ",F.C, "     P(>F.C) =", probF.C,"\n")
+
+# 5.7.2 another staggered nested data
+lab <- factor(rep(1:12,4)); lab
+prep <- factor(c(rep("a",36),rep("b",12))); prep
+test <- factor(c(rep("alpha",24),rep("beta",12),rep("alpha",12))); test
+patient <- factor(c(rep(1,12),rep(2,12),rep(1,24))); patient
 PTSD3 <- c(
   6.8, 12.1, 5.1,  9.8,  4.2,  9.8,  4.3,  6.2, 14.2,  9.3, 10.3, 16.2,
   8.2,  6.5, 7.2,  8.1,  4.1,  8.1,  4.1,  4.9,  3.1,  4.1,  4.6,  3.9,
@@ -520,10 +584,10 @@ PTSD3 <- c(
   5.6,  4.5, 5.1,  6.3,  8.1,  9.0,  8.3,  8.3,  7.7,  8.6,  4.4,  6.5
 );
 PTSD3 <- as.numeric(PTSD3); PTSD3
-PTSD3data <- data.frame(patient,lab,prep,test,PTSD3); PTSD3data # data.frame
+PTSD3data <- data.frame(lab,prep,test,patient,PTSD3); PTSD3data # data.frame
 
 # 5.7.2 staggered nested, method of moments
-m.stag.nest <- aov(PTSD3 ~ patient + patient:lab + patient:lab:prep, data = PTSD3data)
+m.stag.nest <- aov(PTSD3 ~ lab + lab:prep + lab:prep:test, data = PTSD3data)
 summary.stag.nest <- summary(m.stag.nest); summary.stag.nest
 sigma2 <- msE <- as.matrix( summary.stag.nest[[1]][4,3] ); msE # extract from ANOVA
 msC <- as.matrix( summary.stag.nest[[1]][3,3] ); msC 
@@ -533,16 +597,16 @@ sigma2.C <- (msC - sigma2) / (4/3) # method of moments
 sigma2.B <- (msB - sigma2 - (7/6) * sigma2.C ) / (3/2)
 sigma2.A <- (msA - sigma2 - (3/2) * sigma2.C - (5/2) * sigma2.B) / 4
 cat("Method of Moments Variance Component Estimates","\n",
-    "Var(patient)=",sigma2.A,"\n",
-    "Var(patient:lab)=",sigma2.B,"\n",
-    "Var(patient:lab:prep)=",sigma2.C,"\n",
+    "Var(lab)=",sigma2.A,"\n",
+    "Var(lab:prep)=",sigma2.B,"\n",
+    "Var(lab:prep:test)=",sigma2.C,"\n",
     "Var(error)=",sigma2,"\n")
 
-# 5.7.3 staggered nested, REML
+# 5.7.2 staggered nested, REML
 library(lme4)
-m.REML <- lmer(PTSD3 ~ 1 + (1|patient) 
-               + (1|patient:lab) 
-               + (1|patient:lab:prep), data = PTSD3data)
+m.REML <- lmer(PTSD3 ~ 1 + (1|lab) 
+               + (1|lab:prep) 
+               + (1|lab:prep:test), data = PTSD3data)
 summary(m.REML)
 
 # 5.8 Designs with Fixed and Random Effects
