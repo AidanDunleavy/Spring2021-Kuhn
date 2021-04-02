@@ -31,5 +31,5 @@ aliases( lm( y ~ (.)^3,
 
 library(agricolae)
 treat <- c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-des <- design.cyclic(treat, k = 3, r = 9)
+des <- design.cyclic(treat, k = 3, r = 3)
 des$book
